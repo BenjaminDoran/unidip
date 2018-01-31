@@ -36,22 +36,31 @@ def _touch_diffs_(part1, part2, touchpoints):
     diff = np.abs((part2[touchpoints] - part1[touchpoints]))
     return diff.max(), diff
 
-def diptst(idxs, nboot):
+def diptst(dat, is_idxs=True, nboot=1000):
     """ diptest with pval """
     # sample dip
-    d, (_, idxs, left, _, right, _) = dip(idxs=idxs)
+    d, (_, idxs, left, _, right, _) = dip(idxs=dat) \
+                                    if is_idxs else \
+                                      dip(histogram=dat)
+
+    # decide how to run dip algorithm
+    dip_wrapper = (lambda a, b: dip(idxs=a, just_dip=b)) \
+                if is_idxs else \
+                  (lambda a, b: dip(histogram=a, just_dip=b))
 
     # simulate from null uniform
     unifs = np.random.uniform(size=nboot * idxs.shape[0])\
                      .reshape([nboot, idxs.shape[0]])
-    unif_dips = np.apply_along_axis(dip, 1, unifs, just_dip=True)
+    unif_dips = np.apply_along_axis(dip_wrapper, 1, unifs, True)
 
+    print(unif_dips)
 
     # count dips greater or equal to d, add 1/1 to prevent a pvalue of 0
-    p = None if unif_dips.sum() == 0\
-        else (np.less(d, unif_dips).sum() + 1) / (np.float(nboot) + 1)
+    pval = None \
+      if unif_dips.sum() == 0 else \
+        (np.less(d, unif_dips).sum() + 1) / (np.float(nboot) + 1)
 
-    return (d, p, (idxs[len(left)], idxs[-len(right)]))
+    return (d, pval, (idxs[len(left)], idxs[-len(right)]))
 
 def dip(idxs=None, histogram=None, just_dip=False):
     """
