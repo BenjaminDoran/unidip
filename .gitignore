@@ -1,0 +1,4 @@
+.vscode
+*.ipynb*
+__pycache__
+hdt.py
