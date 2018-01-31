@@ -154,12 +154,12 @@ def _test(filename, plot=False, debug=False, **kwargs):
 
 
 if __name__ == "__main__":
-    # _test("tests/testsmall.csv")
-    # _test("tests/peak1.csv", False)
-    # _test("tests/peak2.csv", False)
-    # _test("tests/peak3.csv", False)
-    # _test("tests/large3.csv", False)
-    # _test("tests/test10p.csv")
-    # _test("tests/test1or10p.csv", alpha=.3)
-    # _test("tests/test0.5sig.csv")
+    _test("tests/testsmall.csv")
+    _test("tests/peak1.csv", False)
+    _test("tests/peak2.csv", False)
+    _test("tests/peak3.csv", False)
+    _test("tests/large3.csv", False)
+    _test("tests/test10p.csv")
+    _test("tests/test1or10p.csv", alpha=.3)
+    _test("tests/test0.5sig.csv")
     print("finished testing!")
