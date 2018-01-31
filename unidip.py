@@ -3,7 +3,9 @@
 Author: Benjamin Doran
 Date: Jan 2018
 
-Algorithm ref: ...
+Algorithm ref:
+"Skinny-dip: Clustering in a sea of noise" by Samuel Maurus and Claudia Plant. 
+http://www.kdd.org/kdd2016/subtopic/view/skinny-dip-clustering-in-a-sea-of-noise
 """
 import numpy as np
 import dip
@@ -11,8 +13,27 @@ import dip
 NTRIALS = 100
 
 
-def unidip(dat, alpha=0.05, _is_model=True, plotdat=None):
-    """ Perform unidip algorithm on 1d array """
+def unidip(*args, **kwargs):
+    """ Perform unidip algorithm on 1d array
+
+    """
+    return _unidip(*args, **kwargs)
+
+
+def _unidip(dat, alpha=0.05, _is_model=True, plotdat=None):
+    """ Perform unidip algorithm on 1d array
+
+        INPUT:
+        dat: data
+        alpha: tuning parameter, sets significance level of p_values
+        _is_model: internal should not be changed
+        plotdat: determines whether to plot the data at each recursion level,
+                 set to same as dat argument
+
+        RETURNS:
+        set of tuples: each tuple containing the start and end positions on the
+                       x axis.
+    """
     intervals = set()
     xs = np.sort(dat)
     _, p, modint = dip.diptst(xs, NTRIALS)
