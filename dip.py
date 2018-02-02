@@ -36,52 +36,38 @@ def _touch_diffs_(part1, part2, touchpoints):
     diff = np.abs((part2[touchpoints] - part1[touchpoints]))
     return diff.max(), diff
 
-def diptst(dat, is_idxs=True, nboot=1000):
+def diptst(dat, is_idxs=True, numt=1000):
     """ diptest with pval """
     # sample dip
-    d, (_, idxs, left, _, right, _) = dip(idxs=dat) \
-                                    if is_idxs else \
-                                      dip(histogram=dat)
-
-    # decide how to run dip algorithm
-    dip_wrapper = (lambda a, b: dip(idxs=a, just_dip=b)) \
-                if is_idxs else \
-                  (lambda a, b: dip(histogram=a, just_dip=b))
+    d, (_, idxs, left, _, right, _) = dip(dat, is_idxs)
 
     # simulate from null uniform
-    unifs = np.random.uniform(size=nboot * idxs.shape[0])\
-                     .reshape([nboot, idxs.shape[0]])
-    unif_dips = np.apply_along_axis(dip_wrapper, 1, unifs, True)
-
-    print(unif_dips)
+    unifs = np.random.uniform(size=numt * idxs.shape[0])\
+                     .reshape([numt, idxs.shape[0]])
+    unif_dips = np.apply_along_axis(dip, 1, unifs, is_idxs, True)
 
     # count dips greater or equal to d, add 1/1 to prevent a pvalue of 0
     pval = None \
       if unif_dips.sum() == 0 else \
-        (np.less(d, unif_dips).sum() + 1) / (np.float(nboot) + 1)
+        (np.less(d, unif_dips).sum() + 1) / (np.float(numt) + 1)
 
-    return (d, pval, (idxs[len(left)], idxs[-len(right)]))
+    return (d, pval, # dip, pvalue
+            (len(left), len(idxs)-len(right)), # indices
+            (idxs[len(left)], idxs[-len(right)]) # vals
+           )
 
-def dip(idxs=None, histogram=None, just_dip=False):
+def dip(dat, is_idxs=True, just_dip=False):
     """
         Compute the Hartigans' dip statistic either for a histogram of
         samples (with equidistant bins) or for a set of samples.
     """
-    if idxs is None:
-        idxs = np.arange(len(histogram))
-    elif histogram is None:
-        h = collections.Counter(idxs)
-        idxs = np.msort(list(h.keys()))
-        histogram = np.array([h[i] for i in idxs])
+    if is_idxs:
+        counts = collections.Counter(dat)
+        idxs = np.msort(list(counts.keys()))
+        histogram = np.array([counts[i] for i in idxs])
     else:
-        if len(histogram) != len(idxs):
-            raise ValueError("Need exactly as many indices as histogram bins.")
-        if len(idxs) != len(set(idxs)):
-            raise ValueError("idxs must be unique if histogram is given.")
-        if not np.array_equal(np.msort(idxs), idxs):
-            idxs_s = np.argsort(idxs)
-            idxs = np.asarray(idxs)[idxs_s]
-            histogram = np.asarray(histogram)[idxs_s]
+        histogram = dat
+        idxs = np.arange(len(histogram))
 
     cdf = np.cumsum(histogram, dtype=float)
     cdf /= cdf[-1]
@@ -140,37 +126,6 @@ def dip(idxs=None, histogram=None, just_dip=False):
 
         left[len(left):] = left_part[1:xl+1]
         right[:0] = right_part[xr:-1]
-
-def plot_dip(idxs=None, histogram=None):
-    """ Plot ECDF with colored intervals """
-    from matplotlib import pyplot as plt
-
-    d, (cdf, idxs, left, left_part, right, right_part) = dip(histogram, idxs)
-
-
-    plt.plot(idxs[:len(left)], left, color='red')
-    plt.plot(idxs[len(left)-1:len(left)+len(left_part) - 1], left_part, color='gray')
-    plt.plot(idxs[-len(right):], right, color='blue')
-    plt.plot(idxs[len(cdf)-len(right)+1-len(right_part):len(cdf)-len(right)+1],
-             right_part, color='gray')
-
-    the_dip = max(np.abs(cdf[:len(left)] - left).max(),
-                  np.abs(cdf[-len(right)-1:-1] - right).max())
-    l_dip_idxs = np.abs(cdf[:len(left)] - left) == the_dip
-    r_dip_idxs = np.abs(cdf[-len(right)-1:-1] - right) == the_dip
-    print(the_dip/2, d)
-
-    plt.vlines(x=idxs[:len(left)][l_dip_idxs],
-               ymin=cdf[:len(left)][l_dip_idxs],
-               ymax=cdf[:len(left)][l_dip_idxs] - the_dip)
-    plt.vlines(x=idxs[-len(right):][r_dip_idxs],
-               ymin=cdf[-len(right):][r_dip_idxs],
-               ymax=cdf[-len(right):][r_dip_idxs] + the_dip)
-
-    plt.plot(np.repeat(idxs, 2)[1:], np.repeat(cdf, 2)[:-1], color='black')
-    plt.scatter(idxs, cdf)
-
-    plt.show()
 
 
 def crit_points(random_function, quantiles, sample_size, n_samples):
