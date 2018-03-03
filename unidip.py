@@ -1,4 +1,3 @@
-#!python
 """
 Author: Benjamin Doran
 Date: Jan 2018
@@ -34,28 +33,25 @@ def unidip(dat, is_hist=False, alpha=0.05, numt=NTRIALS, plotdat=None):
     offset = 0
     is_model = True
     _dat_is_x = not is_hist
-    modints, modidxs = _unidip(dat, offset,
-                               _dat_is_x, alpha, is_model, numt, plotdat)
-    return merge_intervals(modints, modidxs)
+    modidxs = _unidip(dat, offset,
+                      _dat_is_x, alpha, is_model, numt, plotdat)
+    return merge_intervals(modidxs)
 
-def merge_intervals(ints, idxs):
+def merge_intervals(idxs, merge_distance=MERGE_DISTANCE):
     """ merge intervals that are touching """
-    midxs, mints = [], []
-    for idx, itv in sorted(zip(idxs, ints)):
-        if not midxs and not mints:
+    midxs = []
+    for idx in sorted(idxs):
+        if not midxs:
             midxs.append(idx)
-            mints.append(itv)
         else:
             lower = midxs[-1]
             # adjacent or overlapping (adjust MERGE_DISTANCE to merge intervals)
             # that are close enough
-            if idx[0] - lower[1] <= MERGE_DISTANCE:
+            if idx[0] - lower[1] <= merge_distance:
                 midxs[-1] = (lower[0], idx[1])
-                mints[-1] = (mints[-1][0], itv[1])
             else:
                 midxs.append(idx)
-                mints.append(itv)
-    return mints, midxs
+    return midxs
 
 
 def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
@@ -80,7 +76,6 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
     # _idxs = np.arange(len(dat))
     if _dat_is_x:
         dat = np.msort(dat)
-    intervals = list()
     interval_idxs = list()
     _, pval, modidx, modint = dip.diptst(dat, _dat_is_x, numt)
 
@@ -93,30 +88,21 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
 
     # not enough data to count it as significant
     if pval is None:
-        return [], []
-
+        return []
     # is unimodal, return interval
-    if pval > alpha:
+    elif pval > alpha:
         if _is_model:
-            intervals.append((dat[0], dat[-1]))
             interval_idxs.append((offset, offset+len(dat)-1))
         else:
             wideint, wideidx = _get_full_interval(dat, modint, _dat_is_x, numt)
-            intervals.append(wideint)
             interval_idxs.append((offset+wideidx[0], offset+wideidx[1]))
-        return intervals, interval_idxs
+        return interval_idxs
 
     # recurse into model interval
-    rmmod, rmidx = _unidip(dat[modidx[0]:modidx[1]+1], offset+modidx[0],
-                           _dat_is_x, alpha, True, numt, plotdat)
-
-    # if not plotdat is None and _dat_is_x: # if plotting -> show intervals
-    #     _db_plot(plotdat, (dat[0], dat[-1]), rmmod, _dat_is_x)
-    # if not plotdat is None and not _dat_is_x:
-    #     _db_plot(plotdat, (offset, offset+len(dat)-1), rmidx, _dat_is_x)
+    rmidx = _unidip(dat[modidx[0]:modidx[1]+1], offset+modidx[0],
+                    _dat_is_x, alpha, True, numt, plotdat)
 
     # add returned intervals to our collection
-    intervals += rmmod
     interval_idxs += rmidx
     # undo offset to get correct indices to data in recursion layer
     subd = list(map(lambda t: (t[0]-offset, t[1]-offset), interval_idxs))
@@ -127,21 +113,19 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
     # recurse low
     pval = dip.diptst(dat[:l_idx[1]+1], _dat_is_x, numt)[1]
     if not pval is None and pval < alpha:
-        rlmod, rlidx = _unidip(dat[:l_idx[0]+1], offset,
-                               _dat_is_x, alpha, False, numt, plotdat)
-        intervals += rlmod
+        rlidx = _unidip(dat[:l_idx[0]+1], offset,
+                        _dat_is_x, alpha, False, numt, plotdat)
         interval_idxs += rlidx
 
     # recurse high
     pval = dip.diptst(dat[h_idx[0]:], _dat_is_x, numt)[1]
     if not pval is None and pval < alpha:
-        rhmod, rhidx = _unidip(dat[h_idx[1]:], offset+h_idx[1],
-                               _dat_is_x, alpha, False, numt, plotdat)
-        intervals += rhmod
+        rhidx = _unidip(dat[h_idx[1]:], offset+h_idx[1],
+                        _dat_is_x, alpha, False, numt, plotdat)
         interval_idxs += rhidx
 
     # return all intervals
-    return intervals, interval_idxs
+    return interval_idxs
 
 
 def _db_plot(dat, sub, ints, is_idxs=True):
@@ -244,12 +228,9 @@ def _test(filename, plot=False, debug=False, **kwargs):
     else:
         ints = unidip(dat, **kwargs)
     end = time()
-    print(f"# intervals returned: {len(ints[0])}")
-    print("vals:")
-    for i in sorted(ints[0]):
-        print(i)
-    print("idxs:")
-    for i in sorted(ints[1]):
+    print(f"# intervals returned: {len(ints)}")
+    print("interval idxs:")
+    for i in sorted(ints):
         print(i)
     print(f"time taken {end-start:.2f}sec\n")
     if plot:
@@ -271,9 +252,9 @@ if __name__ == "__main__":
     # _test("tests/peak3.csv", debug=False) # 3 peaks
     # _test("tests/large3.csv", debug=False) # 3 peaks
     # _test("tests/test10p.csv", plot=False) # 10 peaks
-    # _test("tests/test1or10p.csv", plot=False, alpha=.2) # 10 peaks small gaps
+    _test("tests/test1or10p.csv", plot=False, alpha=0.3) # 10 peaks small gaps
     # _test("tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
-    # _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10,
+    # _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10, so 1
     # _test("tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
-    _test("tests/negEntIdxErr.csv", is_hist=True, debug=True)
+    # _test("tests/negEntIdxErr.csv", is_hist=True, debug=True)
     print("finished testing!")
