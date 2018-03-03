@@ -84,11 +84,12 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
     interval_idxs = list()
     _, pval, modidx, modint = dip.diptst(dat, _dat_is_x, numt)
 
-    if not plotdat is None and _dat_is_x: # if plotting -> show intervals
-        _db_plot(plotdat, (dat[0], dat[-1]), [modint], _dat_is_x)
-    if not plotdat is None and not _dat_is_x:
-        _db_plot(plotdat, (offset, offset+len(dat)-1),
-                 [(offset+modidx[0], offset+modidx[1])], _dat_is_x)
+    if not plotdat is None: # if plotting -> show intervals
+        if _dat_is_x:
+            _db_plot(plotdat, (dat[0], dat[-1]), [modint], _dat_is_x)
+        else:
+            _db_plot(plotdat, (offset, offset+len(dat)-1),
+                     [(offset+modidx[0], offset+modidx[1])], _dat_is_x)
 
     # not enough data to count it as significant
     if pval is None:
@@ -264,14 +265,15 @@ def _test(filename, plot=False, debug=False, **kwargs):
 
 
 if __name__ == "__main__":
-    _test("tests/testsmall.csv") # 0 peaks, not enough data
-    _test("tests/peak1.csv") # 1 peak
-    _test("tests/peak2.csv", debug=False) # 2 peaks
-    _test("tests/peak3.csv", debug=False) # 3 peaks
-    _test("tests/large3.csv", debug=False) # 3 peaks
-    _test("tests/test10p.csv", plot=False) # 10 peaks
-    _test("tests/test1or10p.csv", plot=False, alpha=.2) # 10 peaks small gaps
-    _test("tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
-    _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10,
-    _test("tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
+    # _test("tests/testsmall.csv") # 0 peaks, not enough data
+    # _test("tests/peak1.csv") # 1 peak
+    # _test("tests/peak2.csv", debug=False) # 2 peaks
+    # _test("tests/peak3.csv", debug=False) # 3 peaks
+    # _test("tests/large3.csv", debug=False) # 3 peaks
+    # _test("tests/test10p.csv", plot=False) # 10 peaks
+    # _test("tests/test1or10p.csv", plot=False, alpha=.2) # 10 peaks small gaps
+    # _test("tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
+    # _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10,
+    # _test("tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
+    _test("tests/negEntIdxErr.csv", is_hist=True, debug=True)
     print("finished testing!")
