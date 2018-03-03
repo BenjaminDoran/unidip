@@ -7,6 +7,11 @@
     Hartigan, J. A.; Hartigan, P. M. The Dip Test of Unimodality. The Annals
     of Statistics 13 (1985), no. 1, 70--84. doi:10.1214/aos/1176346577.
     http://projecteuclid.org/euclid.aos/1176346577.
+
+    Credit for Dip implementation:
+    Johannes Bauer, Python implementation of Hartigan's dip test, Jun 17, 2015,
+    commit a0e3d448a4b266f54ec63a5b3d5be351fbd1db1c,
+    https://github.com/tatome/dip_test
 """
 
 import collections
@@ -126,25 +131,3 @@ def dip(dat, is_idxs=True, just_dip=False):
 
         left[len(left):] = left_part[1:xl+1]
         right[:0] = right_part[xr:-1]
-
-
-def crit_points(random_function, quantiles, sample_size, n_samples):
-    """
-        Compute the quantiles for the dip statistic for n_samples
-        samples of size sample_size from the random process given by
-        random_function.
-
-        Parameters:
-        random_function : a paramter-free function which returns random values.
-        quantiles : a sequence of values between 0 and 1
-        sample_size : the size of the samples to draw from random_function
-        n_samples : the number of samples for which to compute dips
-
-        Returns: a list such that the i'th value is the greatest dip observed
-        such that the fraction of dips less than or equal to that value is less
-        than the i'th value from quantiles.
-    """
-    data = [[random_function() for _ in range(sample_size)] for __ in range(n_samples)]
-    dips = np.array([dip(idxs=samples)[0] for samples in data])
-
-    return np.percentile(dips, [p * 100 for p in quantiles])
