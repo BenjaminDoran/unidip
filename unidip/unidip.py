@@ -8,7 +8,7 @@ http://www.kdd.org/kdd2016/subtopic/view/skinny-dip-clustering-in-a-sea-of-noise
 """
 
 import numpy as np
-import dip
+from . import dip
 
 NTRIALS = 100
 MERGE_DISTANCE = 1
@@ -36,6 +36,7 @@ def unidip(dat, is_hist=False, alpha=0.05, numt=NTRIALS, plotdat=None):
     modidxs = _unidip(dat, offset,
                       _dat_is_x, alpha, is_model, numt, plotdat)
     return merge_intervals(modidxs)
+
 
 def merge_intervals(idxs, merge_distance=MERGE_DISTANCE):
     """ merge intervals that are touching """
@@ -81,7 +82,9 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
 
     if not plotdat is None: # if plotting -> show intervals
         if _dat_is_x:
-            _db_plot(plotdat, (dat[0], dat[-1]), [modint], _dat_is_x)
+            _db_plot(plotdat, (dat[0], dat[-1]),
+                     [(dat[offset+modidx[0]], dat[offset+modidx[1]])],
+                     _dat_is_x)
         else:
             _db_plot(plotdat, (offset, offset+len(dat)-1),
                      [(offset+modidx[0], offset+modidx[1])], _dat_is_x)
@@ -246,16 +249,16 @@ def _test(filename, plot=False, debug=False, **kwargs):
 
 
 if __name__ == "__main__":
-    _test("tests/testsmall.csv") # 0 peaks, not enough data
-    _test("tests/peak1.csv") # 1 peak
-    _test("tests/peak2.csv", debug=False) # 2 peaks
-    _test("tests/peak3.csv", debug=False) # 3 peaks
-    _test("tests/large3.csv", debug=False) # 3 peaks
-    _test("tests/test10p.csv", plot=False) # 10 peaks
-    _test("tests/test1or10p.csv", plot=False, alpha=0.3) # 10 peaks small gaps
-    _test("tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
-    _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10, so 1
-    _test("tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
-    # _test("tests/negEntIdxErr.csv", is_hist=True, debug=True) # off by one error in diptst / fixed
-    # _test("tests/negEntMaxRecErr.csv", is_hist=True, debug=True) # lead to errs because search int finds ~3 positions of mode on each side of inter-modal space
+    _test("./tests/testsmall.csv") # 0 peaks, not enough data
+    _test("./tests/peak1.csv") # 1 peak
+    _test("./tests/peak2.csv", debug=False) # 2 peaks
+    _test("./tests/peak3.csv", debug=False) # 3 peaks
+    _test("./tests/large3.csv", debug=False) # 3 peaks
+    _test("./tests/test10p.csv", plot=False) # 10 peaks
+    _test("./tests/test1or10p.csv", plot=False, alpha=0.3) # 10 peaks small gaps
+    _test("./tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
+    _test("./tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10, so 1
+    _test("./tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
+    # _test("./tests/negEntIdxErr.csv", is_hist=True, debug=True) # off by one error in diptst / fixed
+    # _test("./tests/negEntMaxRecErr.csv", is_hist=True, debug=True) # lead to errs because search int finds ~3 positions of mode on each side of inter-modal space
     print("finished testing!")
