@@ -57,8 +57,7 @@ def diptst(dat, is_idxs=True, numt=1000):
         (np.less(d, unif_dips).sum() + 1) / (np.float(numt) + 1)
 
     return (d, pval, # dip, pvalue
-            (len(left), len(idxs)-len(right)), # indices
-            (idxs[len(left)], idxs[-len(right)]) # vals
+            (len(left)-1, len(idxs)-len(right)) # indices
            )
 
 def dip(dat, is_idxs=True, just_dip=False):

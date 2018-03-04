@@ -77,7 +77,7 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
     if _dat_is_x:
         dat = np.msort(dat)
     interval_idxs = list()
-    _, pval, modidx, modint = dip.diptst(dat, _dat_is_x, numt)
+    _, pval, modidx = dip.diptst(dat, _dat_is_x, numt)
 
     if not plotdat is None: # if plotting -> show intervals
         if _dat_is_x:
@@ -94,8 +94,8 @@ def _unidip(dat, offset=0, _dat_is_x=True, alpha=0.05,
         if _is_model:
             interval_idxs.append((offset, offset+len(dat)-1))
         else:
-            wideint, wideidx = _get_full_interval(dat, modint, _dat_is_x, numt)
-            interval_idxs.append((offset+wideidx[0], offset+wideidx[1]))
+            wideidx = _get_full_interval(dat, modidx, _dat_is_x, numt)
+            interval_idxs.append((offset+wideidx[0], offset+wideidx[1]-1))
         return interval_idxs
 
     # recurse into model interval
@@ -149,7 +149,7 @@ def _db_plot(dat, sub, ints, is_idxs=True):
     plt.show()
 
 
-def _get_full_interval(dat, modint, is_idxs, numt):
+def _get_full_interval(dat, modidxs, is_idxs, numt):
     """ Expands discovered intervals
         When looking at unimodal data the dip test tends to return a very narrow
         interval, which can lead to conflicts later. This tends to happen after
@@ -165,10 +165,10 @@ def _get_full_interval(dat, modint, is_idxs, numt):
     rdip = dip.diptst(rdat, is_idxs, numt)
 
     if ldip[0] > rdip[0]:
-        full_indxs = _un_mirror_idxs(ldip[2], len(dat), modint, True)
+        full_indxs = _un_mirror_idxs(ldip[2], len(dat), modidxs, True)
     else:
-        full_indxs = _un_mirror_idxs(rdip[2], len(dat), modint, False)
-    return (tuple(dat[full_indxs]), tuple(full_indxs))
+        full_indxs = _un_mirror_idxs(rdip[2], len(dat), modidxs, False)
+    return tuple(full_indxs)
 
 
 def _mirror_data(dat, is_idxs=True, left=False):
@@ -195,10 +195,10 @@ def _mirror_data(dat, is_idxs=True, left=False):
     return mdat
 
 
-def _un_mirror_idxs(vals, length, modint, left):
+def _un_mirror_idxs(vals, length, modidxs, left):
     """ wrapper for _un_mirror_idx() """
     if vals[0] < length and vals[1] > length:
-        return modint
+        return modidxs
 
     ori_idxs = np.array([_un_mirror_idx(i, length, left) for i in vals])
     return ori_idxs if ori_idxs[0] < ori_idxs[1] else np.flip(ori_idxs, -1)
@@ -246,15 +246,16 @@ def _test(filename, plot=False, debug=False, **kwargs):
 
 
 if __name__ == "__main__":
-    # _test("tests/testsmall.csv") # 0 peaks, not enough data
-    # _test("tests/peak1.csv") # 1 peak
-    # _test("tests/peak2.csv", debug=False) # 2 peaks
-    # _test("tests/peak3.csv", debug=False) # 3 peaks
-    # _test("tests/large3.csv", debug=False) # 3 peaks
-    # _test("tests/test10p.csv", plot=False) # 10 peaks
+    _test("tests/testsmall.csv") # 0 peaks, not enough data
+    _test("tests/peak1.csv") # 1 peak
+    _test("tests/peak2.csv", debug=False) # 2 peaks
+    _test("tests/peak3.csv", debug=False) # 3 peaks
+    _test("tests/large3.csv", debug=False) # 3 peaks
+    _test("tests/test10p.csv", plot=False) # 10 peaks
     _test("tests/test1or10p.csv", plot=False, alpha=0.3) # 10 peaks small gaps
-    # _test("tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
-    # _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10, so 1
-    # _test("tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
-    # _test("tests/negEntIdxErr.csv", is_hist=True, debug=True)
+    _test("tests/test0.5sig.csv", debug=False, alpha=.05) # 5 peaks
+    _test("tests/histnotsig.csv", is_hist=True) # 3 peaks, but n of 10, so 1
+    _test("tests/hist3p.csv", debug=False, is_hist=True) # 3 peaks, n of 60
+    # _test("tests/negEntIdxErr.csv", is_hist=True, debug=True) # off by one error in diptst / fixed
+    # _test("tests/negEntMaxRecErr.csv", is_hist=True, debug=True) # lead to errs because search int finds ~3 positions of mode on each side of inter-modal space
     print("finished testing!")
