@@ -41,15 +41,15 @@ def _touch_diffs_(part1, part2, touchpoints):
     diff = np.abs((part2[touchpoints] - part1[touchpoints]))
     return diff.max(), diff
 
-def diptst(dat, is_idxs=True, numt=1000):
+def diptst(dat, is_hist=False, numt=1000):
     """ diptest with pval """
     # sample dip
-    d, (_, idxs, left, _, right, _) = dip(dat, is_idxs)
+    d, (_, idxs, left, _, right, _) = dip_fn(dat, is_hist)
 
     # simulate from null uniform
     unifs = np.random.uniform(size=numt * idxs.shape[0])\
                      .reshape([numt, idxs.shape[0]])
-    unif_dips = np.apply_along_axis(dip, 1, unifs, is_idxs, True)
+    unif_dips = np.apply_along_axis(dip_fn, 1, unifs, is_hist, True)
 
     # count dips greater or equal to d, add 1/1 to prevent a pvalue of 0
     pval = None \
@@ -60,28 +60,28 @@ def diptst(dat, is_idxs=True, numt=1000):
             (len(left)-1, len(idxs)-len(right)) # indices
            )
 
-def dip(dat, is_idxs=True, just_dip=False):
+def dip_fn(dat, is_hist=False, just_dip=False):
     """
         Compute the Hartigans' dip statistic either for a histogram of
         samples (with equidistant bins) or for a set of samples.
     """
-    if is_idxs:
+    if is_hist:
+        histogram = dat
+        idxs = np.arange(len(histogram))
+    else:
         counts = collections.Counter(dat)
         idxs = np.msort(list(counts.keys()))
         histogram = np.array([counts[i] for i in idxs])
-    else:
-        histogram = dat
-        idxs = np.arange(len(histogram))
-
-    cdf = np.cumsum(histogram, dtype=float)
-    cdf /= cdf[-1]
 
     # check for case 1<N<4 or all identical values
     if len(idxs) <= 4 or idxs[0] == idxs[-1]:
         left = []
         right = [1]
         d = 0.0
-        return d if just_dip else (d, (cdf, idxs, left, None, right, None))
+        return d if just_dip else (d, (None, idxs, left, None, right, None))
+
+    cdf = np.cumsum(histogram, dtype=float)
+    cdf /= cdf[-1]
 
     work_idxs = idxs
     work_histogram = np.asarray(histogram, dtype=float) / np.sum(histogram)
