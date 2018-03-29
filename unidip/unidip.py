@@ -7,10 +7,8 @@ Algorithm:
 """
 
 import numpy as np
-try:
-    from .dip import diptst
-except ImportError: # allow tests to run
-    from dip import diptst
+
+from unidip.dip import diptst
 
 class UniDip:
     """ Class containing the UniDip clustering algorithm.
@@ -212,18 +210,17 @@ class UniDip:
             idxs = (2 * length)-idx if idx > length else idx
         return idxs
 
-def test(filename, plot=False, **kwargs):
+def test_unidip(filename, plot=False, **kwargs):
     """ test filename's.csv peakitude :) """
     from time import time
-
     
     dat = np.genfromtxt(filename, delimiter=",")
     print(f"length of test on {filename}: {len(dat)}")
     
-    unidip = UniDip(dat, **kwargs)
+    udip = UniDip(dat, **kwargs)
 
     start = time()
-    ints = unidip.run()
+    ints = udip.run()
     end = time()
     
     print(f"# intervals returned: {len(ints)}")
@@ -233,19 +230,4 @@ def test(filename, plot=False, **kwargs):
     print(f"time taken {end-start:.2f}sec\n")
     
     if plot:
-        unidip.plot((0, len(dat)), ints)
-
-if __name__ == "__main__":
-    test("./tests/testsmall.csv") # 0 peaks, not enough data
-    test("./tests/peak1.csv", plot=False) # 1 peak
-    test("./tests/peak2.csv", plot=False, debug=False) # 2 peaks
-    test("./tests/peak3.csv", plot=False) # 3 peaks
-    test("./tests/large3.csv", plot=False) # 3 peaks
-    test("./tests/test10p.csv", plot=False, debug=False) # 10 peaks
-    test("./tests/test1or10p.csv", plot=False, alpha=0.3, merge_distance=5) # 10 peaks small gaps
-    test("./tests/test0.5sig.csv", plot=False, debug=False, alpha=.05) # 5 peaks
-    test("./tests/histnotsig.csv", plot=False, is_hist=True) # 3 peaks, but n of 10, so 1
-    test("./tests/hist3p.csv", plot=False, debug=False, is_hist=True) # 3 peaks, n of 60
-    test("./tests/negEntIdxErr.csv", is_hist=True, plot=False) # off by one error in diptst / fixed
-    test("./tests/negEntMaxRecErr.csv", is_hist=True, plot=False) # 4 peaks
-    print("finished testing!")
+        udip.plot((0, len(dat)), ints)
