@@ -8,44 +8,70 @@ class Tester(TestCase):
     # numeric tests
     def test_0_peaks(self):
         """ testing 0 peaks, not enough data """
-        unidip.test_unidip(f"{EXAMPLES}testsmall.csv") 
+        pn = 0
+        ints = unidip.test_unidip(f"{EXAMPLES}testsmall.csv") 
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_1_peak(self):
         """ test 1 peak"""
-        unidip.test_unidip(f"{EXAMPLES}peak1.csv", plot=False)
+        pn = 1
+        ints = unidip.test_unidip(f"{EXAMPLES}peak1.csv", plot=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_2_peaks(self):
         """ test 2 peaks """
-        unidip.test_unidip(f"{EXAMPLES}peak2.csv", plot=False, debug=False)
+        pn = 2
+        ints = unidip.test_unidip(f"{EXAMPLES}peak2.csv", plot=False, debug=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_3_peaks(self): 
         """ test 3 peaks """
-        unidip.test_unidip(f"{EXAMPLES}peak3.csv", plot=False)
+        pn = 3
+        ints = unidip.test_unidip(f"{EXAMPLES}peak3.csv", plot=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_large3_peaks(self):
         """ test large three peaks """
-        unidip.test_unidip(f"{EXAMPLES}large3.csv", plot=False)
+        pn = 3
+        ints = unidip.test_unidip(f"{EXAMPLES}large3.csv", plot=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_10_peaks(self):
         """ test 10 peaks """
-        unidip.test_unidip(f"{EXAMPLES}test10p.csv", plot=False, debug=False)
+        pn = 10
+        ints = unidip.test_unidip(f"{EXAMPLES}test10p.csv", plot=False, debug=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_1or10_peaks(self):
         """ test hidden 10 peaks """
-        unidip.test_unidip(f"{EXAMPLES}test1or10p.csv", 
-                           plot=False, alpha=0.3, merge_distance=5)
+        pn = 10
+        ints = unidip.test_unidip(f"{EXAMPLES}test1or10p.csv", plot=False, alpha=0.3, mrg_dst=5)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_5wide_peaks(self):
         """ test 5 wide peaks """
-        unidip.test_unidip(f"{EXAMPLES}test0.5sig.csv",
-                           plot=False, debug=False, alpha=.05)
+        pn = 5
+        ints = unidip.test_unidip(f"{EXAMPLES}test0.5sig.csv", plot=False, debug=False, alpha=.05)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     # histogram tests
     def test_histsmall_peak(self):
         """ Tests on 10 density points from histogram """
-        unidip.test_unidip(f"{EXAMPLES}histnotsig.csv", 
-                          plot=False, is_hist=True)
+        pn = 1
+        ints = unidip.test_unidip(f"{EXAMPLES}histnotsig.csv", plot=False, is_hist=True)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_hist3_peaks(self):
         """ test 3 histogram peaks """
-        unidip.test_unidip(f"{EXAMPLES}hist3p.csv", plot=False, is_hist=True)
+        pn = 3
+        ints = unidip.test_unidip(f"{EXAMPLES}hist3p.csv", plot=False, is_hist=True)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     # Neg Entropy data
     def test_negEntIdxErr_peaks(self):
         """ tests finding 5 hist peaks """
-        unidip.test_unidip(f"{EXAMPLES}negEntIdxErr.csv", 
-                           is_hist=True, plot=False)
+        pn = 5
+        ints = unidip.test_unidip(f"{EXAMPLES}negEntIdxErr.csv", is_hist=True, plot=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_negEntMaxRecErr(self):
         """ Test for max recursion error on 4 peaks"""
-        unidip.test_unidip(f"{EXAMPLES}negEntMaxRecErr.csv", 
-                           is_hist=True, plot=False)
+        pn = 4
+        ints = unidip.test_unidip(f"{EXAMPLES}negEntMaxRecErr.csv", is_hist=True, plot=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
+    # Real aligned data
+    def test_ReasonableAlignedNent_peaks(self):
+        """ Test of generated aligned data """
+        pn = 3
+        ints = unidip.test_unidip(f"{EXAMPLES}reasonableAlignedNent.csv", alpha=.008, ntrials=1000, is_hist=True, debug=False, plot=False)
+        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
+        print(len(ints))

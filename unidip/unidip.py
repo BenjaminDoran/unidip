@@ -235,11 +235,8 @@ def test_unidip(filename, plot=False, **kwargs):
     ints = udip.run()
     end = time()
     
-    print(f"# intervals returned: {len(ints)}")
-    print("interval idxs:")
-    for i in sorted(ints):
-        print(i)
-    print(f"time taken {end-start:.2f}sec\n")
-    
     if plot:
         udip.plot((0, len(dat)), ints)
+
+    return ints
+    
