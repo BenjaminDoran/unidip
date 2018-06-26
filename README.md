@@ -6,7 +6,6 @@ UniDip is a noise robust clustering algorithm for 1 dimensional numeric data. It
 
 ## Install
 
-coming soon...
 ```
 pip3.6 install unidip
 ```

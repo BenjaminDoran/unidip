@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(name='unidip',
-      version='0.1',
+      version='0.1.1',
       description='Python port of the UniDip clustering algorithm',
       long_description=long_description,
       long_description_content_type="text/markdown",
