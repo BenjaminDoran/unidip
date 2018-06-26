@@ -39,7 +39,7 @@ class Tester(TestCase):
     def test_1or10_peaks(self):
         """ test hidden 10 peaks """
         pn = 10
-        ints = unidip.test_unidip(f"{EXAMPLES}test1or10p.csv", plot=False, alpha=0.3, mrg_dst=5)
+        ints = unidip.test_unidip(f"{EXAMPLES}test1or10p.csv", plot=False, alpha=0.32, mrg_dst=5)
         assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
     def test_5wide_peaks(self):
         """ test 5 wide peaks """
@@ -57,21 +57,3 @@ class Tester(TestCase):
         pn = 3
         ints = unidip.test_unidip(f"{EXAMPLES}hist3p.csv", plot=False, is_hist=True)
         assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
-    # Neg Entropy data
-    def test_negEntIdxErr_peaks(self):
-        """ tests finding 5 hist peaks """
-        pn = 5
-        ints = unidip.test_unidip(f"{EXAMPLES}negEntIdxErr.csv", is_hist=True, plot=False)
-        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
-    def test_negEntMaxRecErr(self):
-        """ Test for max recursion error on 4 peaks"""
-        pn = 4
-        ints = unidip.test_unidip(f"{EXAMPLES}negEntMaxRecErr.csv", is_hist=True, plot=False)
-        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
-    # Real aligned data
-    def test_ReasonableAlignedNent_peaks(self):
-        """ Test of generated aligned data """
-        pn = 3
-        ints = unidip.test_unidip(f"{EXAMPLES}reasonableAlignedNent.csv", alpha=.008, ntrials=1000, is_hist=True, debug=False, plot=False)
-        assert len(ints) == pn, f"Found wrong number of peaks! Should be {pn}, is {len(ints)}."
-        print(len(ints))
