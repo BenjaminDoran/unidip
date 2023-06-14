@@ -12,6 +12,8 @@
     Johannes Bauer, Python implementation of Hartigan's dip test, Jun 17, 2015,
     commit a0e3d448a4b266f54ec63a5b3d5be351fbd1db1c,
     https://github.com/tatome/dip_test
+
+    14 June 2023: Code updated to comply with changes for numpy >= 1.20 by Guy Serbin     
 """
 
 import collections
@@ -54,7 +56,7 @@ def diptst(dat, is_hist=False, numt=1000):
     # count dips greater or equal to d, add 1/1 to prevent a pvalue of 0
     pval = None \
       if unif_dips.sum() == 0 else \
-        (np.less(d, unif_dips).sum() + 1) / (np.float(numt) + 1)
+        (np.less(d, unif_dips).sum() + 1) / (float(numt) + 1)
 
     return (d, pval, # dip, pvalue
             (len(left)-1, len(idxs)-len(right)) # indices
